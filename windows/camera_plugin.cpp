@@ -22,6 +22,8 @@
 #include "com_heap_ptr.h"
 #include "string_utils.h"
 
+#include <iostream>
+
 namespace camera_windows {
 using flutter::EncodableList;
 using flutter::EncodableMap;
@@ -31,6 +33,7 @@ namespace {
 
 // Channel events
 constexpr char kChannelName[] = "plugins.flutter.io/camera_windows";
+constexpr char kImageStreamChannelName[] = "plugins.flutter.io/camera_windows/imageStream";
 
 constexpr char kAvailableCamerasMethod[] = "availableCameras";
 constexpr char kCreateMethod[] = "create";
@@ -38,6 +41,8 @@ constexpr char kInitializeMethod[] = "initialize";
 constexpr char kTakePictureMethod[] = "takePicture";
 constexpr char kStartVideoRecordingMethod[] = "startVideoRecording";
 constexpr char kStopVideoRecordingMethod[] = "stopVideoRecording";
+constexpr char kStartImageStreamMethod[] = "startImageStream";
+constexpr char kStopImageStreamMethod[] = "stopImageStream";
 constexpr char kPausePreview[] = "pausePreview";
 constexpr char kResumePreview[] = "resumePreview";
 constexpr char kDisposeMethod[] = "dispose";
@@ -259,6 +264,18 @@ void CameraPlugin::HandleMethodCall(
     assert(arguments);
 
     return StopVideoRecordingMethodHandler(*arguments, std::move(result));
+  }else if (method_name.compare(kStartImageStreamMethod) == 0) { //start image stream
+    const auto* arguments =
+        std::get_if<flutter::EncodableMap>(method_call.arguments());
+    assert(arguments);
+
+    return StartImageStreamMethodHandler(*arguments, std::move(result));
+  } else if (method_name.compare(kStopImageStreamMethod) == 0) { //stop image stream
+    const auto* arguments =
+        std::get_if<flutter::EncodableMap>(method_call.arguments());
+    assert(arguments);
+
+    return StopImageStreamMethodHandler(*arguments, std::move(result));
   } else if (method_name.compare(kPausePreview) == 0) {
     const auto* arguments =
         std::get_if<flutter::EncodableMap>(method_call.arguments());
@@ -547,6 +564,47 @@ void CameraPlugin::StopVideoRecordingMethodHandler(
     auto cc = camera->GetCaptureController();
     assert(cc);
     cc->StopRecord();
+  }
+}
+
+void CameraPlugin::StartImageStreamMethodHandler(const EncodableMap& args, std::unique_ptr<flutter::MethodResult<>> result){
+  std::cout << "CameraPlugin::StartImageStreamMethodHandler" << std::endl;
+  auto camera_id = GetInt64ValueOrNull(args, kCameraIdKey); //get camera id
+  if (!camera_id) {
+    return result->Error("argument_error",
+                         std::string(kCameraIdKey) + " missing");
+  }
+  //check if request already exists
+  auto camera = GetCameraByCameraId(*camera_id);
+  if (!camera) {
+    return result->Error("camera_error", "Camera not created");
+  }
+  if (camera->HasPendingResultByType(PendingResultType::kStartStream)) {
+    return result->Error("camera_error",
+                         "Pending start stream request exists");
+  }
+  auto channel = std::make_unique<flutter::MethodChannel<>>(
+      registrar->messenger(), kChannelName,
+      &flutter::StandardMethodCodec::GetInstance());
+  if (!channel) {
+    return result->Error("camera_error",
+                         "Unable to make method channel from windows");
+  }
+
+  if (camera->AddPendingResult(PendingResultType::kStartStream,
+                               std::move(result))) {
+    auto cc = camera->GetCaptureController();
+    assert(cc);
+    cc->StartStream(channel);
+  }
+}
+
+void CameraPlugin::StopImageStreamMethodHandler(const EncodableMap& args, std::unique_ptr<flutter::MethodResult<>> result){
+  std::cout<<"StopImageStreamMethodHandler"<<std::endl;
+  auto camera_id = GetInt64ValueOrNull(args, kCameraIdKey);
+  if (!camera_id) {
+    return result->Error("argument_error",
+                         std::string(kCameraIdKey) + " missing");
   }
 }
 

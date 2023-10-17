@@ -7,6 +7,7 @@
 
 #include <d3d11.h>
 #include <flutter/texture_registrar.h>
+#include <flutter/method_channel.h>
 #include <mfapi.h>
 #include <mfcaptureengine.h>
 #include <mferror.h>
@@ -23,6 +24,7 @@
 #include "preview_handler.h"
 #include "record_handler.h"
 #include "texture_handler.h"
+
 
 namespace camera_windows {
 using flutter::TextureRegistrar;
@@ -146,6 +148,8 @@ class CaptureControllerImpl : public CaptureController,
   void StartRecord(const std::string& file_path,
                    int64_t max_video_duration_ms) override;
   void StopRecord() override;
+  void StartStream(flutter::MethodChannel<> imageStream) override;
+  void StopStream() override;
   void TakePicture(const std::string& file_path) override;
 
   // CaptureEngineObserver

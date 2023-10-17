@@ -26,6 +26,8 @@ enum class PendingResultType {
   kTakePicture,
   kStartRecord,
   kStopRecord,
+  kStartStream,
+  kStopStream,
   kPausePreview,
   kResumePreview,
 };
