@@ -270,9 +270,11 @@ class CameraWindows extends CameraPlatform {
         'resumeVideoRecording() is not supported due to Win32 API limitations.');
   }
 
+  int? camid;
   @override
   Stream<CameraImageData> onStreamedFrameAvailable(int cameraId,
       {CameraImageStreamOptions? options}) {
+    camid = cameraId;
     _installStreamController(onListen: _onFrameStreamListen);
     return _frameStreamController!.stream;
   }
@@ -293,7 +295,8 @@ class CameraWindows extends CameraPlatform {
   }
 
   Future<void> _startPlatformStream() async {
-    await pluginChannel.invokeMethod<void>('startImageStream');
+    await pluginChannel.invokeMethod<void>(
+        'startImageStream', <String, dynamic>{'cameraId': camid});
     _startStreamListener();
   }
 

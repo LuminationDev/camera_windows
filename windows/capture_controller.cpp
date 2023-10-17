@@ -561,6 +561,9 @@ void CaptureControllerImpl::StopRecord() {
                            "Failed to stop video recording");
   }
 }
+void CaptureControllerImpl::StartStream(flutter::MethodChannel<> *streamChannel){
+  std::cout<<"made it this far"<<std::endl;
+}
 
 // Stops timed recording. Called internally when requested time is passed.
 // Check MF_CAPTURE_ENGINE_RECORD_STOPPED event handling for response process.

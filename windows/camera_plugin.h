@@ -19,12 +19,12 @@
 namespace camera_windows {
 using flutter::MethodResult;
 
-namespace test {
-namespace {
-// Forward declaration of test class.
-class MockCameraPlugin;
-}  // namespace
-}  // namespace test
+// namespace test {
+// namespace {
+// // Forward declaration of test class.
+// class MockCameraPlugin;
+// }  // namespace
+// }  // namespace test
 
 class CameraPlugin : public flutter::Plugin,
                      public VideoCaptureDeviceEnumerator {
@@ -46,9 +46,12 @@ class CameraPlugin : public flutter::Plugin,
   CameraPlugin(const CameraPlugin&) = delete;
   CameraPlugin& operator=(const CameraPlugin&) = delete;
 
-  // Called when a method is called on plugin channel.
   void HandleMethodCall(const flutter::MethodCall<>& method_call,
                         std::unique_ptr<MethodResult<>> result);
+  // Called when a method is called on plugin channel.
+  void HandleMethodCall(const flutter::MethodCall<>& method_call,
+                        std::unique_ptr<MethodResult<>> result,
+                        flutter::MethodChannel<> *streamChannel);
 
  private:
   // Loops through cameras and returns camera
@@ -106,7 +109,8 @@ class CameraPlugin : public flutter::Plugin,
   // Requests existing camera controller to start recording.
   // Stores result object to be handled after request is processed.
   void StartImageStreamMethodHandler(const EncodableMap& args,
-                                        std::unique_ptr<MethodResult<>> result);
+                                        std::unique_ptr<MethodResult<>> result,
+                                        flutter::MethodChannel<> *streamChannel);
 
   // Handles stopVideoRecording method calls.
   // Requests existing camera controller to stop recording.
@@ -135,7 +139,7 @@ class CameraPlugin : public flutter::Plugin,
   flutter::BinaryMessenger* messenger_;
   std::vector<std::unique_ptr<Camera>> cameras_;
 
-  friend class camera_windows::test::MockCameraPlugin;
+  // friend class camera_windows::test::MockCameraPlugin;
 };
 
 }  // namespace camera_windows

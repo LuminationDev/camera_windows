@@ -113,6 +113,8 @@ class CaptureController {
 
   // Stops the current video recording.
   virtual void StopRecord() = 0;
+  
+  virtual void StartStream(flutter::MethodChannel<> *imageStream) = 0;
 
   // Captures a still photo.
   virtual void TakePicture(const std::string& file_path) = 0;
@@ -148,8 +150,8 @@ class CaptureControllerImpl : public CaptureController,
   void StartRecord(const std::string& file_path,
                    int64_t max_video_duration_ms) override;
   void StopRecord() override;
-  void StartStream(flutter::MethodChannel<> imageStream) override;
-  void StopStream() override;
+  void StartStream(flutter::MethodChannel<> *imageStream) override;
+  // void StopStream() override;
   void TakePicture(const std::string& file_path) override;
 
   // CaptureEngineObserver

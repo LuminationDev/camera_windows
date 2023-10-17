@@ -5,16 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eda8405d-4093-4884-9041-d5ee12332f64" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/example/windows/runner/Runner.rc" beforeDir="false" afterPath="$PROJECT_DIR$/example/windows/runner/Runner.rc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/example/lib/camera_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/example/lib/camera_preview.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/example/lib/main.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/camera_windows.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/camera_windows.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/windows/camera.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/windows/camera.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/windows/camera.h" beforeDir="false" afterPath="$PROJECT_DIR$/windows/camera.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/windows/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/windows/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/windows/camera_plugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/windows/camera_plugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/windows/camera_plugin.h" beforeDir="false" afterPath="$PROJECT_DIR$/windows/camera_plugin.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/windows/capture_controller.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/windows/capture_controller.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/windows/capture_controller.h" beforeDir="false" afterPath="$PROJECT_DIR$/windows/capture_controller.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/windows/capture_controller_listener.h" beforeDir="false" afterPath="$PROJECT_DIR$/windows/capture_controller_listener.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/windows/texture_handler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/windows/texture_handler.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,12 +39,21 @@
     "RunOnceActivity.cidr.known.project.marker": "true",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
-    "last_opened_file_path": "C:/Users/jlund/Downloads/flutter packages main packages-camera_camera_android",
+    "last_opened_file_path": "D:/Work/Github/camera_windows/example/lib",
     "run.code.analysis.last.selected.profile": "pProject Default",
     "settings.editor.selected.configurable": "preferences.pluginManager",
     "show.migrate.to.gradle.popup": "false"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Work\Github\camera_windows\example\lib" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Work\Github\camera_windows\example\lib" />
+      <recent name="D:\Work\Github\camera_windows\lib" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="main.dart" type="FlutterRunConfigurationType" factoryName="Flutter">
       <option name="filePath" value="$PROJECT_DIR$/example/lib/main.dart" />
