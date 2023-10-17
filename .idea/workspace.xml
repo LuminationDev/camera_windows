@@ -5,16 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eda8405d-4093-4884-9041-d5ee12332f64" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/example/lib/camera_controller.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/lib/camera_preview.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/example/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/camera_windows.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/camera_windows.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/windows/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/windows/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/windows/camera_plugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/windows/camera_plugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/windows/camera_plugin.h" beforeDir="false" afterPath="$PROJECT_DIR$/windows/camera_plugin.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/windows/capture_controller.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/windows/capture_controller.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/windows/capture_controller.h" beforeDir="false" afterPath="$PROJECT_DIR$/windows/capture_controller.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/windows/texture_handler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/windows/texture_handler.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/windows/texture_handler.h" beforeDir="false" afterPath="$PROJECT_DIR$/windows/texture_handler.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

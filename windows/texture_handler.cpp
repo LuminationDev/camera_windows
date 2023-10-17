@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "texture_handler.h"
+#include <iostream>
 
 #include <cassert>
 
@@ -62,8 +63,15 @@ void TextureHandler::OnBufferUpdated() {
   }
 }
 
+// FlutterDesktopPixel* latest;
+
+// FlutterDesktopPixel* getLatest(){
+//   return latest;
+// }
+
 const FlutterDesktopPixelBuffer* TextureHandler::ConvertPixelBufferForFlutter(
     size_t target_width, size_t target_height) {
+      // std::cout<<target_width+" : "+target_height<<std::endl;
   // TODO: optimize image processing size by adjusting capture size
   // dynamically to match target_width and target_height.
   // If target size changes, create new media type for preview and set new
@@ -116,6 +124,7 @@ const FlutterDesktopPixelBuffer* TextureHandler::ConvertPixelBufferForFlutter(
         }
       }
     }
+    // latest=dst;
 
     if (!flutter_desktop_pixel_buffer_) {
       flutter_desktop_pixel_buffer_ =

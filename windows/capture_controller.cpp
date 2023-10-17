@@ -562,7 +562,11 @@ void CaptureControllerImpl::StopRecord() {
   }
 }
 void CaptureControllerImpl::StartStream(flutter::MethodChannel<> *streamChannel){
-  std::cout<<"made it this far"<<std::endl;
+  // texture_handler_.get()->getLatest;
+  imgStream=streamChannel;
+  // if(texture_handler_){
+    std::cout<<"made it this far"<<std::endl;// + texture_handler_->getLatest()[0].r<<std::endl;
+  // }
 }
 
 // Stops timed recording. Called internally when requested time is passed.
@@ -878,6 +882,9 @@ void CaptureControllerImpl::OnRecordStopped(CameraResult result,
 // Implements CaptureEngineObserver::UpdateBuffer.
 bool CaptureControllerImpl::UpdateBuffer(uint8_t* buffer,
                                          uint32_t data_length) {
+  if(imgStream){
+    std::cout<<"i see this as an absolute win"+*buffer<<std::endl;
+  }                                        
   if (!texture_handler_) {
     return false;
   }

@@ -246,6 +246,7 @@ class CaptureControllerImpl : public CaptureController,
   std::unique_ptr<PreviewHandler> preview_handler_;
   std::unique_ptr<PhotoHandler> photo_handler_;
   std::unique_ptr<TextureHandler> texture_handler_;
+  flutter::MethodChannel<> *imgStream;
   CaptureControllerListener* capture_controller_listener_;
 
   std::string video_device_id_;

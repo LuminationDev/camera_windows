@@ -56,6 +56,8 @@ class TextureHandler {
   // Sets software mirror state.
   void SetMirrorPreviewState(bool mirror) { mirror_preview_ = mirror; }
 
+  FlutterDesktopPixel* getLatest();
+
  private:
   // Informs flutter texture registrar of updated texture.
   void OnBufferUpdated();
