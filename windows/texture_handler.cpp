@@ -1,13 +1,21 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+#include <flutter/event_channel.h>
+#include <flutter/event_sink.h>
+#include <flutter/event_stream_handler_functions.h>
+#include <flutter/method_channel.h>
+#include <flutter/standard_method_codec.h>
+#include <windows.h>
 
+#include <memory>
 #include "texture_handler.h"
 #include <iostream>
 
 #include <cassert>
 
 namespace camera_windows {
+  using flutter::EncodableValue;
 
 TextureHandler::~TextureHandler() {
   // Texture might still be processed while destructor is called.
@@ -55,6 +63,26 @@ bool TextureHandler::UpdateBuffer(uint8_t* data, uint32_t data_length) {
   OnBufferUpdated();
   return true;
 };
+bool TextureHandler::UpdateBuffer(uint8_t* data, uint32_t data_length, flutter::MethodChannel<> *imageStream) {
+  // Scoped lock guard.
+  {
+    // std::cout<<"UpdateBuffer"<<std::endl;
+    imgStream = imageStream;
+    const std::lock_guard<std::mutex> lock(buffer_mutex_);
+    if (!TextureRegistered()) {
+      return false;
+    }
+
+    if (source_buffer_.size() != data_length) {
+      // Update source buffer size.
+      source_buffer_.resize(data_length);
+    }
+    std::copy(data, data + data_length, source_buffer_.data());
+  }
+  OnBufferUpdated();
+  return true;
+};
+
 
 // Marks texture frame available after buffer is updated.
 void TextureHandler::OnBufferUpdated() {
@@ -80,7 +108,7 @@ const FlutterDesktopPixelBuffer* TextureHandler::ConvertPixelBufferForFlutter(
   // Update output media type with IMFCaptureSink2::SetOutputMediaType method
   // call and implement IMFCaptureEngineOnSampleCallback2::OnSynchronizedEvent
   // to detect size changes.
-
+  
   // Lock buffer mutex to protect texture processing
   std::unique_lock<std::mutex> buffer_lock(buffer_mutex_);
   if (!TextureRegistered()) {
@@ -124,8 +152,8 @@ const FlutterDesktopPixelBuffer* TextureHandler::ConvertPixelBufferForFlutter(
         }
       }
     }
-    // latest=dst;
 
+    // latest=dst;
     if (!flutter_desktop_pixel_buffer_) {
       flutter_desktop_pixel_buffer_ =
           std::make_unique<FlutterDesktopPixelBuffer>();
@@ -144,7 +172,18 @@ const FlutterDesktopPixelBuffer* TextureHandler::ConvertPixelBufferForFlutter(
 
     // Releases unique_lock and set mutex pointer for release context.
     flutter_desktop_pixel_buffer_->release_context = buffer_lock.release();
-
+    if(imgStream!=nullptr){
+      imgStream->InvokeMethod("plugins.flutter.io/camera_windows/imageStream" , std::move(std::make_unique<EncodableValue>(flutter_desktop_pixel_buffer_.get())));
+      // std::cout<<"I'm amazing"<<std::endl;
+      // imgStream->messenger().invokeMethod("onFrameAvailable",flutter_desktop_pixel_buffer_.get());
+      // imgStream->SetMethodCallHandler(
+      // [/*=,frame = flutter_desktop_pixel_buffer_.get()*/](const auto& call, auto result) {
+      //   std::cout<<"I'm amazing 1"<<std::endl;
+      //   // result->Success(EncodableValue("frame"));
+      //   // imgStream = nullptr;
+      //   // plugin_pointer->HandleMethodCall(call, std::move(result), streamC);
+      // });
+    }
     return flutter_desktop_pixel_buffer_.get();
   }
   return nullptr;

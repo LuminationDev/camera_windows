@@ -51,7 +51,7 @@ class CameraPlugin : public flutter::Plugin,
   // Called when a method is called on plugin channel.
   void HandleMethodCall(const flutter::MethodCall<>& method_call,
                         std::unique_ptr<MethodResult<>> result,
-                        flutter::MethodChannel<> *streamChannel);
+                        std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> streamChannel);
 
  private:
   // Loops through cameras and returns camera
@@ -109,8 +109,7 @@ class CameraPlugin : public flutter::Plugin,
   // Requests existing camera controller to start recording.
   // Stores result object to be handled after request is processed.
   void StartImageStreamMethodHandler(const EncodableMap& args,
-                                        std::unique_ptr<MethodResult<>> result,
-                                        flutter::MethodChannel<> *streamChannel);
+                                        std::unique_ptr<MethodResult<>> result);
 
   // Handles stopVideoRecording method calls.
   // Requests existing camera controller to stop recording.

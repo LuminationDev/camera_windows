@@ -565,7 +565,7 @@ void CaptureControllerImpl::StartStream(flutter::MethodChannel<> *streamChannel)
   // texture_handler_.get()->getLatest;
   imgStream=streamChannel;
   // if(texture_handler_){
-    std::cout<<"made it this far"<<std::endl;// + texture_handler_->getLatest()[0].r<<std::endl;
+    // std::cout<<"made it this far"<<std::endl;// + texture_handler_->getLatest()[0].r<<std::endl;
   // }
 }
 
@@ -882,13 +882,17 @@ void CaptureControllerImpl::OnRecordStopped(CameraResult result,
 // Implements CaptureEngineObserver::UpdateBuffer.
 bool CaptureControllerImpl::UpdateBuffer(uint8_t* buffer,
                                          uint32_t data_length) {
-  if(imgStream){
-    std::cout<<"i see this as an absolute win"+*buffer<<std::endl;
-  }                                        
+  // if(imgStream){
+  //   std::cout<<"i see this as an absolute win"+*buffer<<std::endl;
+  // }                                        
   if (!texture_handler_) {
     return false;
   }
-  return texture_handler_->UpdateBuffer(buffer, data_length);
+  if(imgStream){
+    return texture_handler_->UpdateBuffer(buffer, data_length, imgStream);
+  }else{
+    return texture_handler_->UpdateBuffer(buffer, data_length);
+  }
 }
 
 // Handles capture time update from each processed frame.

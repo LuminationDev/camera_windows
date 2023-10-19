@@ -6,6 +6,8 @@
 #define PACKAGES_CAMERA_CAMERA_WINDOWS_WINDOWS_TEXTURE_HANDLER_H_
 
 #include <flutter/texture_registrar.h>
+#include <flutter/method_channel.h>
+
 
 #include <memory>
 #include <mutex>
@@ -37,12 +39,15 @@ class TextureHandler {
       : texture_registrar_(texture_registrar) {}
   virtual ~TextureHandler();
 
+  flutter::MethodChannel<> *imgStream=nullptr;
+
   // Prevent copying.
   TextureHandler(TextureHandler const&) = delete;
   TextureHandler& operator=(TextureHandler const&) = delete;
 
   // Updates source data buffer with given data.
   bool UpdateBuffer(uint8_t* data, uint32_t data_length);
+  bool UpdateBuffer(uint8_t* data, uint32_t data_length,  flutter::MethodChannel<> *imgStream);
 
   // Registers texture and updates given texture_id pointer value.
   int64_t RegisterTexture();

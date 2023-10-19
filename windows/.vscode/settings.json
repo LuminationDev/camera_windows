@@ -68,5 +68,6 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "iostream": "cpp"
-    }
+    },
+    "cmake.configureOnOpen": false
 }

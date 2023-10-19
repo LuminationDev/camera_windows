@@ -295,18 +295,20 @@ class CameraWindows extends CameraPlatform {
   }
 
   Future<void> _startPlatformStream() async {
-    await pluginChannel.invokeMethod<void>(
-        'startImageStream', <String, dynamic>{'cameraId': camid});
+    print("here");
     _startStreamListener();
+    try {
+      pluginChannel.invokeMethod<void>(
+          'startImageStream', <String, dynamic>{'cameraId': camid});
+    } on PlatformException catch (e) {}
   }
 
   void _startStreamListener() {
-    const EventChannel cameraEventChannel =
-        EventChannel('plugins.flutter.io/camera_android/imageStream');
-    _platformImageStreamSubscription =
-        cameraEventChannel.receiveBroadcastStream().listen((dynamic imageData) {
-      _frameStreamController!.add(
-          imageData); //cameraImageFromPlatformData(imageData as Map<dynamic, dynamic>));
+    const MethodChannel cameraEventChannel =
+        MethodChannel('plugins.flutter.io/camera_windows/imageStream');
+    cameraEventChannel.setMethodCallHandler((call) {
+      print("awesome ${call.method}");
+      return Future(() => "test");
     });
   }
 
