@@ -8,6 +8,7 @@ import 'dart:math';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:image/image.dart' as img;
 import 'package:stream_transform/stream_transform.dart';
 
 /// An implementation of [CameraPlatform] for Windows.
@@ -39,6 +40,10 @@ class CameraWindows extends CameraPlatform {
   Stream<CameraEvent> _cameraEvents(int cameraId) =>
       cameraEventStreamController.stream
           .where((CameraEvent event) => event.cameraId == cameraId);
+
+  StreamController<CameraImageData>? _frameStreamController;
+
+  StreamSubscription<dynamic>? _platformImageStreamSubscription;
 
   @override
   Future<List<CameraDescription>> availableCameras() async {
@@ -232,8 +237,14 @@ class CameraWindows extends CameraPlatform {
       <String, dynamic>{
         'cameraId': options.cameraId,
         'maxVideoDuration': options.maxDuration?.inMilliseconds,
+        // 'enableStream': options.streamCallback != null,
       },
     );
+
+    // if (options.streamCallback != null) {
+    //   _installStreamController().stream.listen(options.streamCallback);
+    //   _startStreamListener();
+    // }
   }
 
   @override
@@ -258,6 +269,100 @@ class CameraWindows extends CameraPlatform {
   Future<void> resumeVideoRecording(int cameraId) async {
     throw UnsupportedError(
         'resumeVideoRecording() is not supported due to Win32 API limitations.');
+  }
+
+  int? camid;
+  @override
+  Stream<CameraImageData> onStreamedFrameAvailable(int cameraId,
+      {CameraImageStreamOptions? options}) {
+    camid = cameraId;
+    _installStreamController(onListen: _onFrameStreamListen);
+    return _frameStreamController!.stream;
+  }
+
+  StreamController<CameraImageData> _installStreamController(
+      {Function()? onListen}) {
+    _frameStreamController = StreamController<CameraImageData>(
+      onListen: onListen ?? () {},
+      onPause: _onFrameStreamPauseResume,
+      onResume: _onFrameStreamPauseResume,
+      onCancel: _onFrameStreamCancel,
+    );
+    return _frameStreamController!;
+  }
+
+  void _onFrameStreamListen() {
+    _startPlatformStream();
+  }
+
+  StreamController<img.Image>? ImageStream;
+  Future<Stream<img.Image>> _startPlatformStream() async {
+    print("here");
+    _startStreamListener();
+    try {
+      pluginChannel.invokeMethod<void>(
+          'startImageStream', <String, dynamic>{'cameraId': camid});
+    } on PlatformException catch (e) {}
+    ImageStream = StreamController<img.Image>();
+    return ImageStream!.stream.asBroadcastStream();
+  }
+
+  void _startStreamListener() {
+    const MethodChannel cameraEventChannel =
+        MethodChannel('plugins.flutter.io/camera_windows/imageStream');
+    Stopwatch stopwatch = Stopwatch();
+    cameraEventChannel.setMethodCallHandler((call) {
+      if (stopwatch.isRunning) {
+        print(stopwatch.elapsed.inMicroseconds);
+        stopwatch.reset();
+      } else {
+        stopwatch.start();
+      }
+      // print("processing frame");
+      List<int> frame = (call.arguments)['data'] as List<int>;
+      int width = (call.arguments)['width'] as int;
+      int height = (call.arguments)['height'] as int;
+      final image = img.Image(width: width, height: height);
+      // CameraImageData data = CameraImageData(CameraImageFormat);
+      // int count = 0;
+      for (int i = 0; i + 4 < frame.length; i += 4) {
+        if (!(frame[i] == 0 &&
+            frame[i + 1] == 0 &&
+            frame[i + 2] == 0 &&
+            frame[i + 3] != 255)) {
+          try {
+            int x = (i / 4).floor() % width;
+            int y = (i / 4).floor() ~/ width;
+            // print("x: $x");
+            // print("y: $y");
+            image.setPixel(
+                x,
+                y,
+                img.ColorRgba8(
+                    frame[i], frame[i + 1], frame[i + 2], frame[i + 3]));
+          } catch (e) {
+            print(e.toString());
+          }
+          // print("setting frame");
+        }
+      }
+      ImageStream?.add(image);
+      //
+      // print("awesome ${image.buffer.lengthInBytes}. ");
+      return Future(() => "test");
+    });
+  }
+
+  FutureOr<void> _onFrameStreamCancel() async {
+    await pluginChannel.invokeMethod<void>('stopImageStream');
+    await _platformImageStreamSubscription?.cancel();
+    _platformImageStreamSubscription = null;
+    _frameStreamController = null;
+  }
+
+  void _onFrameStreamPauseResume() {
+    throw CameraException('InvalidCall',
+        'Pause and resume are not supported for onStreamedFrameAvailable');
   }
 
   @override
@@ -438,5 +543,23 @@ class CameraWindows extends CameraPlatform {
         return CameraLensDirection.external;
     }
     throw ArgumentError('Unknown CameraLensDirection value');
+  }
+}
+
+class Pixel {
+  int r;
+  int g;
+  int b;
+  int a;
+
+  Pixel(this.r, this.g, this.b, this.a);
+
+  Map<String, dynamic> toJson() {
+    return {
+      'r': r,
+      'g': g,
+      'b': b,
+      'a': a,
+    };
   }
 }

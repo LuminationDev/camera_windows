@@ -7,6 +7,8 @@
 #include <cassert>
 
 namespace camera_windows {
+  using flutter::EncodableValue;
+  using flutter::EncodableMap;
 
 TextureHandler::~TextureHandler() {
   // Texture might still be processed while destructor is called.
@@ -111,12 +113,39 @@ const FlutterDesktopPixelBuffer* TextureHandler::ConvertPixelBufferForFlutter(
         } else {
           dst[sp].r = src[sp].r;
           dst[sp].g = src[sp].g;
-          dst[sp].b = src[sp].b;
+          dst[sp].b = src[sp].b;  
           dst[sp].a = 255;
         }
       }
     }
+    // std::cout<<dst->a<<std::endl;
 
+
+    if(imgStream!=nullptr){
+      
+      // std::string str(dest_buffer_.begin(), dest_buffer_.end());
+      // std::cout<<dst[639].r<<std::endl;
+      std::vector<uint8_t> serializedData(reinterpret_cast<uint8_t*>(dst), reinterpret_cast<uint8_t*>(dst +(preview_frame_height_*preview_frame_width_) ));
+
+      std::unique_ptr<EncodableValue> message_data =
+        std::make_unique<EncodableValue>(EncodableMap(
+            {
+              {EncodableValue("height"), EncodableValue(static_cast<int64_t>(preview_frame_height_))},
+              {EncodableValue("width"), EncodableValue(static_cast<int64_t>(preview_frame_width_))},
+              {EncodableValue("data"), EncodableValue(serializedData)},
+            }));
+      imgStream->InvokeMethod("plugins.flutter.io/camera_windows/imageStream" , std::move(message_data));
+      // std::cout<<"I'm amazing"<<std::endl;
+      // imgStream->messenger().invokeMethod("onFrameAvailable",flutter_desktop_pixel_buffer_.get());
+      // imgStream->SetMethodCallHandler(
+      // [/*=,frame = flutter_desktop_pixel_buffer_.get()*/](const auto& call, auto result) {
+      //   std::cout<<"I'm amazing 1"<<std::endl;
+      //   // result->Success(EncodableValue("frame"));
+      //   // imgStream = nullptr;
+      //   // plugin_pointer->HandleMethodCall(call, std::move(result), streamC);
+      // });
+    }
+    // latest=dst;
     if (!flutter_desktop_pixel_buffer_) {
       flutter_desktop_pixel_buffer_ =
           std::make_unique<FlutterDesktopPixelBuffer>();
@@ -135,7 +164,6 @@ const FlutterDesktopPixelBuffer* TextureHandler::ConvertPixelBufferForFlutter(
 
     // Releases unique_lock and set mutex pointer for release context.
     flutter_desktop_pixel_buffer_->release_context = buffer_lock.release();
-
     return flutter_desktop_pixel_buffer_.get();
   }
   return nullptr;

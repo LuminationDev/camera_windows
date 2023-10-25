@@ -22,6 +22,7 @@ dependencies:
   flutter:
     sdk: flutter
   stream_transform: ^2.0.0
+  image: any
 
 dev_dependencies:
   async: ^2.5.0
