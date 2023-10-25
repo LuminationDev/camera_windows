@@ -8,6 +8,7 @@ import 'dart:math';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:image/image.dart' as img;
 import 'package:stream_transform/stream_transform.dart';
 
 /// An implementation of [CameraPlatform] for Windows.
@@ -294,20 +295,60 @@ class CameraWindows extends CameraPlatform {
     _startPlatformStream();
   }
 
-  Future<void> _startPlatformStream() async {
+  StreamController<img.Image>? ImageStream;
+  Future<Stream<img.Image>> _startPlatformStream() async {
     print("here");
     _startStreamListener();
     try {
       pluginChannel.invokeMethod<void>(
           'startImageStream', <String, dynamic>{'cameraId': camid});
     } on PlatformException catch (e) {}
+    ImageStream = StreamController<img.Image>();
+    return ImageStream!.stream.asBroadcastStream();
   }
 
   void _startStreamListener() {
     const MethodChannel cameraEventChannel =
         MethodChannel('plugins.flutter.io/camera_windows/imageStream');
+    Stopwatch stopwatch = Stopwatch();
     cameraEventChannel.setMethodCallHandler((call) {
-      print("awesome ${call.method}");
+      if (stopwatch.isRunning) {
+        print(stopwatch.elapsed.inMicroseconds);
+        stopwatch.reset();
+      } else {
+        stopwatch.start();
+      }
+      // print("processing frame");
+      List<int> frame = (call.arguments)['data'] as List<int>;
+      int width = (call.arguments)['width'] as int;
+      int height = (call.arguments)['height'] as int;
+      final image = img.Image(width: width, height: height);
+      // CameraImageData data = CameraImageData(CameraImageFormat);
+      // int count = 0;
+      for (int i = 0; i + 4 < frame.length; i += 4) {
+        if (!(frame[i] == 0 &&
+            frame[i + 1] == 0 &&
+            frame[i + 2] == 0 &&
+            frame[i + 3] != 255)) {
+          try {
+            int x = (i / 4).floor() % width;
+            int y = (i / 4).floor() ~/ width;
+            // print("x: $x");
+            // print("y: $y");
+            image.setPixel(
+                x,
+                y,
+                img.ColorRgba8(
+                    frame[i], frame[i + 1], frame[i + 2], frame[i + 3]));
+          } catch (e) {
+            print(e.toString());
+          }
+          // print("setting frame");
+        }
+      }
+      ImageStream?.add(image);
+      //
+      // print("awesome ${image.buffer.lengthInBytes}. ");
       return Future(() => "test");
     });
   }
