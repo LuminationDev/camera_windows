@@ -7,6 +7,7 @@ environment:
   flutter: ">=3.7.0"
 
 dependencies:
+  image: any
   camera_platform_interface: ^2.1.2
   camera_windows:
     # When depending on this package from a real application you should use:

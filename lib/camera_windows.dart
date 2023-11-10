@@ -8,7 +8,6 @@ import 'dart:math';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:image/image.dart' as img;
 import 'package:stream_transform/stream_transform.dart';
 
 /// An implementation of [CameraPlatform] for Windows.
@@ -295,60 +294,100 @@ class CameraWindows extends CameraPlatform {
     _startPlatformStream();
   }
 
-  StreamController<img.Image>? ImageStream;
-  Future<Stream<img.Image>> _startPlatformStream() async {
+  // StreamController<img.Image>? ImageStream;
+  Future<void> _startPlatformStream() async {
     print("here");
+
     _startStreamListener();
+    // await Future.delayed(const Duration(milliseconds: 100));
     try {
       pluginChannel.invokeMethod<void>(
           'startImageStream', <String, dynamic>{'cameraId': camid});
-    } on PlatformException catch (e) {}
-    ImageStream = StreamController<img.Image>();
-    return ImageStream!.stream.asBroadcastStream();
+      print("Successfully started!!!!!!!");
+    } on PlatformException catch (e) {
+      print("Platforme xception noooo: $e");
+    }
+
+    // ImageStream = StreamController<img.Image>();
+    // return ImageStream!.stream.asBroadcastStream();
   }
 
   void _startStreamListener() {
     const MethodChannel cameraEventChannel =
         MethodChannel('plugins.flutter.io/camera_windows/imageStream');
     Stopwatch stopwatch = Stopwatch();
-    cameraEventChannel.setMethodCallHandler((call) {
-      if (stopwatch.isRunning) {
-        print(stopwatch.elapsed.inMicroseconds);
-        stopwatch.reset();
-      } else {
-        stopwatch.start();
-      }
-      // print("processing frame");
+    cameraEventChannel.setMethodCallHandler((MethodCall call) {
+
       List<int> frame = (call.arguments)['data'] as List<int>;
       int width = (call.arguments)['width'] as int;
       int height = (call.arguments)['height'] as int;
-      final image = img.Image(width: width, height: height);
-      // CameraImageData data = CameraImageData(CameraImageFormat);
-      // int count = 0;
+      
+      print("sanity check");
+
+      // TODO: Need to create a CameraImageData object and drop it into the _frameStreamController.stream
+
+      List<int> rBytes = [];
+      List<int> gBytes = [];
+      List<int> bBytes = [];
+      List<int> aBytes = [];
+
       for (int i = 0; i + 4 < frame.length; i += 4) {
         if (!(frame[i] == 0 &&
             frame[i + 1] == 0 &&
             frame[i + 2] == 0 &&
             frame[i + 3] != 255)) {
           try {
-            int x = (i / 4).floor() % width;
-            int y = (i / 4).floor() ~/ width;
-            // print("x: $x");
-            // print("y: $y");
-            image.setPixel(
-                x,
-                y,
-                img.ColorRgba8(
-                    frame[i], frame[i + 1], frame[i + 2], frame[i + 3]));
+            rBytes.add(frame[i]);
+            gBytes.add(frame[i + 1]);
+            bBytes.add(frame[i + 2]);
+            aBytes.add(frame[i + 3]);
           } catch (e) {
             print(e.toString());
           }
           // print("setting frame");
         }
       }
-      ImageStream?.add(image);
-      //
-      // print("awesome ${image.buffer.lengthInBytes}. ");
+      Uint8List rUint8List = Uint8List.fromList(rBytes);
+      Uint8List gUint8List = Uint8List.fromList(gBytes);
+      Uint8List bUint8List = Uint8List.fromList(bBytes);
+      Uint8List aUint8List = Uint8List.fromList(aBytes);
+
+      CameraImagePlane rPlane = CameraImagePlane(
+        bytes: rUint8List,
+        bytesPerRow: width,
+        width: width,
+        height: height,
+      );
+      CameraImagePlane gPlane = CameraImagePlane(
+        bytes: gUint8List,
+        bytesPerRow: width,
+        width: width,
+        height: height,
+      );
+      CameraImagePlane bPlane = CameraImagePlane(
+        bytes: bUint8List,
+        bytesPerRow: width,
+        width: width,
+        height: height,
+      );
+      CameraImagePlane aPlane = CameraImagePlane(
+        bytes: aUint8List,
+        bytesPerRow: width,
+        width: width,
+        height: height,
+      );
+
+      CameraImageData myImageData = CameraImageData(
+          format: CameraImageFormat(
+            ImageFormatGroup.bgra8888,
+            raw: 42, //This represents RGBA on Android?
+          ),
+          planes: [rPlane, gPlane, bPlane, aPlane],
+          height: height,
+          width: width);
+
+      _frameStreamController!.sink.add(myImageData);
+
       return Future(() => "test");
     });
   }

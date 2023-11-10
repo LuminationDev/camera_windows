@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:developer';
 
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/foundation.dart';
@@ -307,11 +308,18 @@ class CameraController extends ValueNotifier<CameraValue> {
   /// Start streaming images from platform camera.
   Future<void> startImageStream(
       Function(CameraImageData image) onAvailable) async {
+    //TODO: CameraImageData
+    // _startStreamListener
     _imageStreamSubscription = CameraPlatform.instance
         .onStreamedFrameAvailable(_cameraId)
         .listen((CameraImageData imageData) {
+      log("image height; ${imageData.height}");
+      log("${imageData.format.}");
+      log("UEFUEFHEUFBUEFBUEFBEUFBEUF");
+
       onAvailable(imageData);
     });
+
     value = value.copyWith(isStreamingImages: true);
   }
 

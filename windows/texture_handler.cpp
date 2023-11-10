@@ -16,6 +16,7 @@
 
 namespace camera_windows {
   using flutter::EncodableValue;
+  using flutter::EncodableMap;
 
 TextureHandler::~TextureHandler() {
   // Texture might still be processed while destructor is called.
@@ -173,16 +174,17 @@ const FlutterDesktopPixelBuffer* TextureHandler::ConvertPixelBufferForFlutter(
     // Releases unique_lock and set mutex pointer for release context.
     flutter_desktop_pixel_buffer_->release_context = buffer_lock.release();
     if(imgStream!=nullptr){
-      imgStream->InvokeMethod("plugins.flutter.io/camera_windows/imageStream" , std::move(std::make_unique<EncodableValue>(flutter_desktop_pixel_buffer_.get())));
-      // std::cout<<"I'm amazing"<<std::endl;
-      // imgStream->messenger().invokeMethod("onFrameAvailable",flutter_desktop_pixel_buffer_.get());
-      // imgStream->SetMethodCallHandler(
-      // [/*=,frame = flutter_desktop_pixel_buffer_.get()*/](const auto& call, auto result) {
-      //   std::cout<<"I'm amazing 1"<<std::endl;
-      //   // result->Success(EncodableValue("frame"));
-      //   // imgStream = nullptr;
-      //   // plugin_pointer->HandleMethodCall(call, std::move(result), streamC);
-      // });
+      std::vector<uint8_t> serializedData(reinterpret_cast<uint8_t*>(dst), reinterpret_cast<uint8_t*>(dst +(preview_frame_height_*preview_frame_width_) ));
+
+      std::unique_ptr<EncodableValue> message_data =
+              std::make_unique<EncodableValue>(EncodableMap(
+                      {
+                              {EncodableValue("height"), EncodableValue(static_cast<int64_t>(preview_frame_height_))},
+                              {EncodableValue("width"), EncodableValue(static_cast<int64_t>(preview_frame_width_))},
+                              {EncodableValue("data"), EncodableValue(serializedData)},
+                      }));
+      imgStream->InvokeMethod("plugins.flutter.io/camera_windows/imageStream" , std::move(message_data));
+//      imgStream->InvokeMethod("plugins.flutter.io/camera_windows/imageStream" , std::move(std::make_unique<EncodableValue>(flutter_desktop_pixel_buffer_.get())));
     }
     return flutter_desktop_pixel_buffer_.get();
   }
