@@ -314,7 +314,6 @@ class CameraController extends ValueNotifier<CameraValue> {
         .onStreamedFrameAvailable(_cameraId)
         .listen((CameraImageData imageData) {
       log("image height; ${imageData.height}");
-      log("${imageData.format.}");
       log("UEFUEFHEUFBUEFBUEFBEUFBEUF");
 
       onAvailable(imageData);
