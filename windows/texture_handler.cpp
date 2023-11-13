@@ -124,11 +124,23 @@ const FlutterDesktopPixelBuffer* TextureHandler::ConvertPixelBufferForFlutter(
       dest_buffer_.resize(data_size);
     }
 
+    if (r_array.size() != pixels_total) {
+      r_array.resize(pixels_total);
+      g_array.resize(pixels_total);
+      b_array.resize(pixels_total);
+      a_array.resize(pixels_total);
+    }
+
     // Map buffers to structs for easier conversion.
     MFVideoFormatRGB32Pixel* src =
         reinterpret_cast<MFVideoFormatRGB32Pixel*>(source_buffer_.data());
     FlutterDesktopPixel* dst =
         reinterpret_cast<FlutterDesktopPixel*>(dest_buffer_.data());
+
+    uint8_t * r_pointer = reinterpret_cast<uint8_t*>(r_array.data());
+    uint8_t* g_pointer = reinterpret_cast<uint8_t*>(g_array.data());
+    uint8_t* b_pointer = reinterpret_cast<uint8_t*>(b_array.data());
+    uint8_t* a_pointer = reinterpret_cast<uint8_t*>(a_array.data());
 
     for (uint32_t y = 0; y < preview_frame_height_; y++) {
       for (uint32_t x = 0; x < preview_frame_width_; x++) {
@@ -145,11 +157,21 @@ const FlutterDesktopPixelBuffer* TextureHandler::ConvertPixelBufferForFlutter(
           dst[tp].g = src[sp].g;
           dst[tp].b = src[sp].b;
           dst[tp].a = 255;
+
+          r_pointer[tp] = src[sp].r;
+          g_pointer[tp] = src[sp].g;
+          b_pointer[tp] = src[sp].b;
+          a_pointer[tp] = 255;
         } else {
           dst[sp].r = src[sp].r;
           dst[sp].g = src[sp].g;
           dst[sp].b = src[sp].b;
           dst[sp].a = 255;
+
+          r_pointer[sp] = src[sp].r;
+          g_pointer[sp] = src[sp].g;
+          b_pointer[sp] = src[sp].b;
+          a_pointer[sp] = 255;
         }
       }
     }
@@ -174,14 +196,23 @@ const FlutterDesktopPixelBuffer* TextureHandler::ConvertPixelBufferForFlutter(
     // Releases unique_lock and set mutex pointer for release context.
     flutter_desktop_pixel_buffer_->release_context = buffer_lock.release();
     if(imgStream!=nullptr){
-      std::vector<uint8_t> serializedData(reinterpret_cast<uint8_t*>(dst), reinterpret_cast<uint8_t*>(dst +(preview_frame_height_*preview_frame_width_) ));
+//      std::vector<uint8_t> serializedData(reinterpret_cast<uint8_t*>(dst), reinterpret_cast<uint8_t*>(dst +(preview_frame_height_*preview_frame_width_) ));
+
+      std::vector<uint8_t> serializedDataR(reinterpret_cast<uint8_t*>(r_pointer), reinterpret_cast<uint8_t*>(r_pointer +(preview_frame_height_*preview_frame_width_) ));
+      std::vector<uint8_t> serializedDataG(reinterpret_cast<uint8_t*>(g_pointer), reinterpret_cast<uint8_t*>(g_pointer +(preview_frame_height_*preview_frame_width_) ));
+      std::vector<uint8_t> serializedDataB(reinterpret_cast<uint8_t*>(b_pointer), reinterpret_cast<uint8_t*>(b_pointer +(preview_frame_height_*preview_frame_width_) ));
+      std::vector<uint8_t> serializedDataA(reinterpret_cast<uint8_t*>(a_pointer), reinterpret_cast<uint8_t*>(a_pointer +(preview_frame_height_*preview_frame_width_) ));
 
       std::unique_ptr<EncodableValue> message_data =
               std::make_unique<EncodableValue>(EncodableMap(
                       {
                               {EncodableValue("height"), EncodableValue(static_cast<int64_t>(preview_frame_height_))},
                               {EncodableValue("width"), EncodableValue(static_cast<int64_t>(preview_frame_width_))},
-                              {EncodableValue("data"), EncodableValue(serializedData)},
+//                              {EncodableValue("data"), EncodableValue(serializedData)},
+                              {EncodableValue("dataR"), EncodableValue(serializedDataR)},
+                              {EncodableValue("dataG"), EncodableValue(serializedDataG)},
+                              {EncodableValue("dataB"), EncodableValue(serializedDataB)},
+                              {EncodableValue("dataA"), EncodableValue(serializedDataA)},
                       }));
       imgStream->InvokeMethod("plugins.flutter.io/camera_windows/imageStream" , std::move(message_data));
 //      imgStream->InvokeMethod("plugins.flutter.io/camera_windows/imageStream" , std::move(std::make_unique<EncodableValue>(flutter_desktop_pixel_buffer_.get())));
