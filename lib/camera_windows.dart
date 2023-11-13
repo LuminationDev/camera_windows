@@ -315,63 +315,40 @@ class CameraWindows extends CameraPlatform {
   void _startStreamListener() {
     const MethodChannel cameraEventChannel =
         MethodChannel('plugins.flutter.io/camera_windows/imageStream');
-    Stopwatch stopwatch = Stopwatch();
+    // Stopwatch stopwatch = Stopwatch();
     cameraEventChannel.setMethodCallHandler((MethodCall call) {
+      
+      // print("HELLO FROM THE OTHER SIDE");
 
-      List<int> frame = (call.arguments)['data'] as List<int>;
+      // Uint8List frame = (call.arguments)['dataR'] as Uint8List;
+      Uint8List frameRValues = call.arguments['dataR'] as Uint8List;
+      Uint8List frameGValues = call.arguments['dataG'] as Uint8List;
+      Uint8List frameBValues = call.arguments['dataB'] as Uint8List;
+      Uint8List frameAValues = call.arguments['dataA'] as Uint8List;
+
       int width = (call.arguments)['width'] as int;
       int height = (call.arguments)['height'] as int;
       
-      print("sanity check");
-
-      // TODO: Need to create a CameraImageData object and drop it into the _frameStreamController.stream
-
-      List<int> rBytes = [];
-      List<int> gBytes = [];
-      List<int> bBytes = [];
-      List<int> aBytes = [];
-
-      for (int i = 0; i + 4 < frame.length; i += 4) {
-        if (!(frame[i] == 0 &&
-            frame[i + 1] == 0 &&
-            frame[i + 2] == 0 &&
-            frame[i + 3] != 255)) {
-          try {
-            rBytes.add(frame[i]);
-            gBytes.add(frame[i + 1]);
-            bBytes.add(frame[i + 2]);
-            aBytes.add(frame[i + 3]);
-          } catch (e) {
-            print(e.toString());
-          }
-          // print("setting frame");
-        }
-      }
-      Uint8List rUint8List = Uint8List.fromList(rBytes);
-      Uint8List gUint8List = Uint8List.fromList(gBytes);
-      Uint8List bUint8List = Uint8List.fromList(bBytes);
-      Uint8List aUint8List = Uint8List.fromList(aBytes);
-
       CameraImagePlane rPlane = CameraImagePlane(
-        bytes: rUint8List,
+        bytes: frameRValues,
         bytesPerRow: width,
         width: width,
         height: height,
       );
       CameraImagePlane gPlane = CameraImagePlane(
-        bytes: gUint8List,
+        bytes: frameGValues,
         bytesPerRow: width,
         width: width,
         height: height,
       );
       CameraImagePlane bPlane = CameraImagePlane(
-        bytes: bUint8List,
+        bytes: frameBValues,
         bytesPerRow: width,
         width: width,
         height: height,
       );
       CameraImagePlane aPlane = CameraImagePlane(
-        bytes: aUint8List,
+        bytes: frameAValues,
         bytesPerRow: width,
         width: width,
         height: height,
@@ -380,11 +357,20 @@ class CameraWindows extends CameraPlatform {
       CameraImageData myImageData = CameraImageData(
           format: CameraImageFormat(
             ImageFormatGroup.bgra8888,
-            raw: 42, //This represents RGBA on Android?
+            raw: 42, //This represents RGBA on Android
           ),
           planes: [rPlane, gPlane, bPlane, aPlane],
           height: height,
           width: width);
+
+      // CameraImageData myImageData = CameraImageData(
+      //     format: CameraImageFormat(
+      //       ImageFormatGroup.bgra8888,
+      //       raw: 42, //This represents RGBA on Android?
+      //     ),
+      //     planes: [],
+      //     height: 0,
+      //     width: 0);
 
       _frameStreamController!.sink.add(myImageData);
 

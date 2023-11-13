@@ -83,6 +83,11 @@ class TextureHandler {
   uint32_t preview_frame_width_ = 0;
   uint32_t preview_frame_height_ = 0;
 
+  std::vector<uint8_t> r_array;
+  std::vector<uint8_t> g_array;
+  std::vector<uint8_t> b_array;
+  std::vector<uint8_t> a_array;
+
   std::vector<uint8_t> source_buffer_;
   std::vector<uint8_t> dest_buffer_;
   std::unique_ptr<flutter::TextureVariant> texture_;
